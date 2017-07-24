@@ -1,8 +1,10 @@
 package com.example.tmili.applocation;
 
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,11 +25,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
     GoogleMap mMap;
     private final String LOG_TAG = "TestApp";
@@ -36,10 +43,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView TxtTim;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    LocationServices mLocationService;
+    private Circle circle;
+
 
     public LatLng myLoc;
-    public Location locaion;
 
     public double tm;
     public double tm1;
@@ -58,6 +65,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,9 +78,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 mMap.clear();
                 myLoc = new LatLng(tm, tm1);
-                mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
+                mMap.addMarker(new MarkerOptions()
+                        .position(myLoc)
+                        .title("Marker in Sydney")
+                        .draggable(false));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
 
+                circle = mMap.addCircle(new CircleOptions()
+                                .center(myLoc)
+                                .radius(5000)
+                                .strokeWidth(10)
+                                .fillColor(Color.GREEN)
+                                .strokeColor(Color.BLUE));
 
 
                 TxtLat.setText(Double.toString(tm));
@@ -79,11 +101,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         });
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+
 
         TxtLat = (TextView) findViewById(R.id.TxtLat);
         TxtLon = (TextView) findViewById(R.id.TxtLon);
@@ -95,13 +113,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStart() {
         super.onStart();
-        // Connect the client.
         mGoogleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
-        // Disconnecting the client invalidates it.
         mGoogleApiClient.disconnect();
         super.onStop();
     }
@@ -111,10 +127,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(1000); // Update location every second
+        mLocationRequest.setInterval(1000);
 
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission
+                (this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -124,8 +142,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        mLocationService.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest
+                , this);
 
 
     }
@@ -133,12 +151,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i(LOG_TAG, "GoogleApiClient connection has been suspend");
+      int v = Log.i(LOG_TAG, "GoogleApiClient connection has been suspend");
+
+        Toast.makeText(this, v, Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(LOG_TAG, "GoogleApiClient connection has failed");
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+     int t = Log.i(LOG_TAG, "GoogleApiClient connection has failed");
+
+        Toast.makeText(this, t, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -161,19 +184,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+
         if (id == R.id.action_settings) {
             return true;
         }
@@ -181,26 +202,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        myLoc = new LatLng(tm,tm1);
+        myLoc = new LatLng(tm, tm1);
 
         mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+
+
+
+            circle = mMap.addCircle(new CircleOptions()
+                .center(myLoc)
+                .radius(1000)
+                .strokeWidth(10)
+                    .fillColor(Color.GREEN)
+                    .strokeColor(Color.BLUE)
+            );
 
     }
 
     public void loco(View view) {
         mMap.clear();
-        myLoc = new LatLng(tm,tm1);
+        myLoc = new LatLng(tm, tm1);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
         mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
 
 
     }
+
+
 }
