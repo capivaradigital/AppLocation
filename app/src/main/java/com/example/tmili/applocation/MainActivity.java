@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -45,14 +46,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest mLocationRequest;
     private Circle circle;
 
-
     public LatLng myLoc;
 
     public double tm;
     public double tm1;
-    public double tm2;
-    public double tm3;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,11 +82,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
 
                 circle = mMap.addCircle(new CircleOptions()
-                                .center(myLoc)
-                                .radius(5000)
-                                .strokeWidth(10)
-                                .fillColor(Color.GREEN)
-                                .strokeColor(Color.BLUE));
+                        .center(myLoc)
+                        .radius(5000)
+                        .strokeWidth(10)
+                        .fillColor(Color.GREEN)
+                        .strokeColor(Color.BLUE));
 
 
                 TxtLat.setText(Double.toString(tm));
@@ -100,7 +97,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         });
-
 
 
         TxtLat = (TextView) findViewById(R.id.TxtLat);
@@ -130,9 +126,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationRequest.setInterval(1000);
 
 
-        if (ActivityCompat.checkSelfPermission
-                (this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -173,12 +167,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         tm = location.getLatitude();
         tm1 = location.getLongitude();
-
-
-        tm2 = location.getLatitude();
-        tm3 = location.getLongitude();
-
-
     }
 
 
@@ -202,8 +190,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
 
         mMap = googleMap;
 
@@ -213,9 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
 
-
-
-            circle = mMap.addCircle(new CircleOptions()
+        circle = mMap.addCircle(new CircleOptions()
                 .center(myLoc)
                 .radius(1000)
                 .strokeWidth(10)
