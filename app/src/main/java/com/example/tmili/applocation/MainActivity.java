@@ -5,8 +5,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -36,7 +38,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener, GoogleMap.OnMyLocationButtonClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
 
     GoogleMap mMap;
     private final String LOG_TAG = "TestApp";
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean mDeveExibirDialog;
     private Circle circle;
     private static final int REQUEST_PERMISSIONS = 3;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private boolean mPermissionDenied = false;
 
     public LatLng myLoc;
     public LatLng ponto2;
@@ -78,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
                 mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A"));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ponto2, 16));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
 
 
                 circle = mMap.addCircle(new CircleOptions()
@@ -110,6 +114,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }//dist ini
 
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            PermitirLocalizacao.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+        } else if (mMap != null) {
+            mMap.setMyLocationEnabled(false);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            return;
+        }
+
+        if (PermitirLocalizacao.isPermissionGranted(permissions, grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+            enableMyLocation();
+        }
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        if (mPermissionDenied) {
+            showMissingPermissionError();
+            mPermissionDenied = false;
+        }
+    }
+
+    private void showMissingPermissionError() {
+        PermitirLocalizacao.PermissionDeniedDialog
+                .newInstance(true).show(getFragmentManager(), "dialog");
+    }
 
     public double distancia(LatLng latlon1,LatLng latlon2) {  // generally used geo measurement function
         double R = 6378.137; // Radius of earth in KM
@@ -152,33 +192,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        enableMyLocation();
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
     }
 
-/*
-    private boolean permissoesHabilitadas() {
-        Log.d("NGVL", "permissoesHabilitadas::BEGIN");
-        List<String> permissoes = new ArrayList<String>();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            permissoes.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            permissoes.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (!permissoes.isEmpty()&& mDeveExibirDialog){
-            String[] array = new String[permissoes.size()];
-            permissoes.toArray(array);
-            ActivityCompat.requestPermissions(this, array, REQUEST_PERMISSIONS);
-            mDeveExibirDialog = false;
-        }
-        Log.d("NGVL", "permissoesHabilitadas::END");
-        return permissoes.isEmpty();
-    }
-
-*/
     @Override
     public void onConnectionSuspended(int i) {
       int v = Log.i(LOG_TAG, "GoogleApiClient connection has been suspend");
@@ -246,7 +264,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .fillColor(Color.GREEN)
                     .strokeColor(Color.BLUE)
             );
-
     }
 
     public void loco(View view) {
@@ -259,4 +276,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
 }
