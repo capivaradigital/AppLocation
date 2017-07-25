@@ -1,13 +1,12 @@
 package com.example.tmili.applocation;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -31,6 +30,9 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -40,18 +42,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final String LOG_TAG = "TestApp";
     private TextView TxtLat;
     private TextView TxtLon;
-    private TextView TxtPro;
     private TextView TxtTim;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    boolean mDeveExibirDialog;
     private Circle circle;
+    private static final int REQUEST_PERMISSIONS = 3;
 
     public LatLng myLoc;
+    public LatLng ponto2;
 
     public double tm;
     public double tm1;
 
-    @Override
+    //41102
+
+    @Override//inicio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -62,49 +68,60 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMap.clear();
+                ponto2 = new LatLng(-8.0395369, -34.8871825);
+                myLoc = new LatLng(tm, tm1);
+                mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+                mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ponto2, 16));
+
+
+                circle = mMap.addCircle(new CircleOptions()
+                        .center(myLoc)
+                        .radius(1000)
+                        .strokeWidth(10)
+                        .strokeColor(Color.GREEN)
+                        .fillColor(Color.argb(128,255,0,0))
+                        .clickable(true));
+                TxtLat.setText(Double.toString(tm));
+                TxtLon.setText(Double.toString(tm1));
+
+                TxtTim.setText(Double.toString(distancia(myLoc,ponto2)));
+
+            }
+
+        });//fim
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                mMap.clear();
-                myLoc = new LatLng(tm, tm1);
-                mMap.addMarker(new MarkerOptions()
-                        .position(myLoc)
-                        .title("Marker in Sydney")
-                        .draggable(false));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-
-                circle = mMap.addCircle(new CircleOptions()
-                        .center(myLoc)
-                        .radius(5000)
-                        .strokeWidth(10)
-                        .fillColor(Color.GREEN)
-                        .strokeColor(Color.BLUE));
-
-
-                TxtLat.setText(Double.toString(tm));
-                TxtLon.setText(Double.toString(tm1));
-                TxtPro.setText("thiago");
-                TxtTim.setText(Double.toString(123));
-
-            }
-
-        });
-
-
         TxtLat = (TextView) findViewById(R.id.TxtLat);
         TxtLon = (TextView) findViewById(R.id.TxtLon);
-        TxtPro = (TextView) findViewById(R.id.TxtPro);
+
         TxtTim = (TextView) findViewById(R.id.TxtTim);
 
-    }
+    }//dist ini
+
+
+    public double distancia(LatLng latlon1,LatLng latlon2) {  // generally used geo measurement function
+        double R = 6378.137; // Radius of earth in KM
+        double dLat = latlon2.latitude * Math.PI / 180 - latlon1.latitude * Math.PI / 180;
+        double dLon = latlon2.longitude * Math.PI / 180 - latlon1.longitude * Math.PI / 180;
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(latlon1.latitude * Math.PI / 180) * Math.cos(latlon2.latitude * Math.PI / 180) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = R * c;
+        return d * 1000;
+    }//dist fim
 
     @Override
     protected void onStart() {
@@ -125,8 +142,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(1000);
 
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -136,13 +152,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest
-                , this);
-
-
+        LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
+/*
+    private boolean permissoesHabilitadas() {
+        Log.d("NGVL", "permissoesHabilitadas::BEGIN");
+        List<String> permissoes = new ArrayList<String>();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            permissoes.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            permissoes.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (!permissoes.isEmpty()&& mDeveExibirDialog){
+            String[] array = new String[permissoes.size()];
+            permissoes.toArray(array);
+            ActivityCompat.requestPermissions(this, array, REQUEST_PERMISSIONS);
+            mDeveExibirDialog = false;
+        }
+        Log.d("NGVL", "permissoesHabilitadas::END");
+        return permissoes.isEmpty();
+    }
 
+*/
     @Override
     public void onConnectionSuspended(int i) {
       int v = Log.i(LOG_TAG, "GoogleApiClient connection has been suspend");
@@ -152,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(ConnectionResult connectionResult) {
      int t = Log.i(LOG_TAG, "GoogleApiClient connection has failed");
 
         Toast.makeText(this, t, Toast.LENGTH_SHORT).show();
