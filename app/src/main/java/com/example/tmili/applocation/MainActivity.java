@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,8 +104,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
                 }
 
-
-
                 circle = mMap.addCircle(new CircleOptions()
                         .center(myLoc)
                         .radius(radiu)
@@ -110,9 +111,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .strokeColor(Color.GREEN)
                         .fillColor(Color.argb(128,255,0,0))
                         .clickable(true));
+
                 TxtLat.setText(Double.toString(tm));
                 TxtLon.setText(Double.toString(tm1));
-
                 TxtTim.setText(Boolean.toString(true));
 
             }
@@ -127,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         TxtLat = (TextView) findViewById(R.id.TxtLat);
         TxtLon = (TextView) findViewById(R.id.TxtLon);
-
         TxtTim = (TextView) findViewById(R.id.TxtTim);
 
     }//dist ini
@@ -151,9 +151,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (PermitirLocalizacao.isPermissionGranted(permissions, grantResults,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
-            enableMyLocation();
+          enableMyLocation();
         }
     }
+
 
     @Override
     protected void onResumeFragments() {
@@ -174,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+        enableMyLocation();
     }
 
     @Override
@@ -198,8 +200,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             return;
-        }
-        enableMyLocation();
+        }enableMyLocation();
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
     }
@@ -271,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .fillColor(Color.GREEN)
                     .strokeColor(Color.BLUE)
             );
+        enableMyLocation();
     }
 
     public void loco(View view) {
@@ -290,8 +292,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 }
 
 
-
-
+//ZONA FANTASMA
 
 
     /*public boolean distancia(LatLng latlon1,LatLng latlon2) {  // generally used geo measurement function
