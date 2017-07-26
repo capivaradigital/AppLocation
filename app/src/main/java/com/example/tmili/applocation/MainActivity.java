@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LocationRequest mLocationRequest;
     boolean mDeveExibirDialog;
     private Circle circle;
+    private int radiu=1000;
     private static final int REQUEST_PERMISSIONS = 3;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
@@ -76,18 +77,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mMap.clear();
+               mMap.clear();
+
                 ponto2 = new LatLng(-8.0395369, -34.8871825);
                 myLoc = new LatLng(tm, tm1);
                 mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-                mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A"));
+                Distancia d = new Distancia(myLoc,ponto2);
+                if(d.getDistancia()<radiu){
+                mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+                }
+                ponto2 = new LatLng(-8.0395369, -34.8875925);
+                d.setDistancia(ponto2);
+                if(d.getDistancia()<radiu){
+                    mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+                }
+                ponto2 = new LatLng(-8.0395369, -34.880978);
+                d.setDistancia(ponto2);
+                if(d.getDistancia()<radiu){
+                    mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
+                }
+
 
 
                 circle = mMap.addCircle(new CircleOptions()
                         .center(myLoc)
-                        .radius(1000)
+                        .radius(radiu)
                         .strokeWidth(10)
                         .strokeColor(Color.GREEN)
                         .fillColor(Color.argb(128,255,0,0))
@@ -95,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 TxtLat.setText(Double.toString(tm));
                 TxtLon.setText(Double.toString(tm1));
 
-                TxtTim.setText(Double.toString(distancia(myLoc,ponto2)));
+                TxtTim.setText(Boolean.toString(true));
 
             }
 
@@ -151,17 +169,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .newInstance(true).show(getFragmentManager(), "dialog");
     }
 
-    public double distancia(LatLng latlon1,LatLng latlon2) {  // generally used geo measurement function
-        double R = 6378.137; // Radius of earth in KM
-        double dLat = latlon2.latitude * Math.PI / 180 - latlon1.latitude * Math.PI / 180;
-        double dLon = latlon2.longitude * Math.PI / 180 - latlon1.longitude * Math.PI / 180;
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(latlon1.latitude * Math.PI / 180) * Math.cos(latlon2.latitude * Math.PI / 180) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double d = R * c;
-        return d * 1000;
-    }//dist fim
 
     @Override
     protected void onStart() {
@@ -259,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         circle = mMap.addCircle(new CircleOptions()
                 .center(myLoc)
-                .radius(1000)
+                .radius(radiu)
                 .strokeWidth(10)
                     .fillColor(Color.GREEN)
                     .strokeColor(Color.BLUE)
@@ -281,3 +288,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return false;
     }
 }
+
+
+
+
+
+
+    /*public boolean distancia(LatLng latlon1,LatLng latlon2) {  // generally used geo measurement function
+        double R = 6378.137; // Radius of earth in KM
+        double dLat = latlon2.latitude * Math.PI / 180 - latlon1.latitude * Math.PI / 180;
+        double dLon = latlon2.longitude * Math.PI / 180 - latlon1.longitude * Math.PI / 180;
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(latlon1.latitude * Math.PI / 180) * Math.cos(latlon2.latitude * Math.PI / 180) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double d = R * c;
+        if(d*1000<radiu){
+            return true;
+        }else{
+            return false;
+        }
+    }*///dist fim
