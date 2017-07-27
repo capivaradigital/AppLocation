@@ -50,25 +50,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     GoogleMap mMap;
     private final String LOG_TAG = "TestApp";
+
+    private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private Circle circle;
+    FirebaseDatabase database;
+
     private TextView TxtLat;
     private TextView TxtLon;
     private TextView TxtTim;
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    boolean mDeveExibirDialog;
-    private Circle circle;
-    private int radiu=1000;
-    private static final int REQUEST_PERMISSIONS = 3;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private boolean mPermissionDenied = false;
-    FirebaseDatabase database;
 
     public LatLng myLoc;
-    public LatLng ponto2;
     public LatLng novoP;
 
     public double tm;
     public double tm1;
+    private int radiu=1000;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private boolean mPermissionDenied = false;
 
     //41102
 
