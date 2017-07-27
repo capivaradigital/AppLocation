@@ -1,6 +1,7 @@
 package com.example.tmili.applocation;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -27,10 +28,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int REQUEST_PERMISSIONS = 3;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
+    FirebaseDatabase database;
 
     public LatLng myLoc;
     public LatLng ponto2;
@@ -72,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+         database = FirebaseDatabase.getInstance();
+
 
 
 
@@ -257,8 +269,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-
         mMap = googleMap;
+
+        final DatabaseReference myRef = database.getReference("Local");
+        mMap.clear();
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
+                for (DataSnapshot dataSnapshot1 : dataSnapshots) {
+                    Local value = dataSnapshot1.getValue(Local.class);
+
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(value.getLat(), value.getLon()))
+                            .flat(true)
+                            .title(value.getNome())
+                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                            .snippet(dataSnapshot1.getKey())
+
+                    );
+                }
+
+
+
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+
+
 
         // Add a marker in Sydney and move the camera
         myLoc = new LatLng(tm, tm1);
@@ -281,6 +321,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         myLoc = new LatLng(tm, tm1);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
         mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
+
+
+
+
+
 
 
     }
