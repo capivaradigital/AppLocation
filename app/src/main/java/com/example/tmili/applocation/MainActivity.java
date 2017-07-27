@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public LatLng myLoc;
     public LatLng ponto2;
+    public LatLng novoP;
 
     public double tm;
     public double tm1;
@@ -91,27 +92,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
                mMap.clear();
 
-                ponto2 = new LatLng(-8.0395369, -34.8871825);
+
                 myLoc = new LatLng(tm, tm1);
                 mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-                Distancia d = new Distancia(myLoc,ponto2);
-                if(d.getDistancia()<radiu){
-                mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-                }
-                ponto2 = new LatLng(-8.0395369, -34.8875925);
-                d.setDistancia(ponto2);
-                if(d.getDistancia()<radiu){
-                    mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-                }
-                ponto2 = new LatLng(-8.0395369, -34.880978);
-                d.setDistancia(ponto2);
-                if(d.getDistancia()<radiu){
-                    mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-                }
+                final DatabaseReference myRef = database.getReference("Local");
+                myRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
+
+                        for (DataSnapshot dataSnapshot1 : dataSnapshots) {
+                            Local value = dataSnapshot1.getValue(Local.class);
+                            novoP = new LatLng(value.getLat(), value.getLon());
+                            Distancia d = new Distancia(myLoc, novoP);
+                            if (d.getDistancia() < radiu) {
+                                mMap.addMarker(new MarkerOptions()
+                                        .position(novoP)
+                                        .flat(true)
+                                        .title(value.getNome())
+                                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                                        .snippet(dataSnapshot1.getKey())
+
+                                );
+                            }
+                        }
+
+
+
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                    }
+                });
 
                 circle = mMap.addCircle(new CircleOptions()
                         .center(myLoc)
@@ -274,17 +287,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
+
                 for (DataSnapshot dataSnapshot1 : dataSnapshots) {
                     Local value = dataSnapshot1.getValue(Local.class);
+                    novoP = new LatLng(value.getLat(), value.getLon());
+                    Distancia d = new Distancia(myLoc, novoP);
+                    if (d.getDistancia() < radiu) {
+                        mMap.addMarker(new MarkerOptions()
+                                .position(novoP)
+                                .flat(true)
+                                .title(value.getNome())
+                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                                .snippet(dataSnapshot1.getKey())
 
-                    mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(value.getLat(), value.getLon()))
-                            .flat(true)
-                            .title(value.getNome())
-                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
-                            .snippet(dataSnapshot1.getKey())
-
-                    );
+                        );
+                    }
                 }
 
 
