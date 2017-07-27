@@ -1,6 +1,7 @@
 package com.example.tmili.applocation;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -27,10 +28,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int REQUEST_PERMISSIONS = 3;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
+    FirebaseDatabase database;
 
     public LatLng myLoc;
     public LatLng ponto2;
@@ -72,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+         database = FirebaseDatabase.getInstance();
+
+
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -96,12 +111,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 ponto2 = new LatLng(-8.0395369, -34.880978);
                 d.setDistancia(ponto2);
-                if(d.getDistancia()<1111111111){
+                if(d.getDistancia()<radiu){
                     mMap.addMarker(new MarkerOptions().position(ponto2).title("ponto A").draggable(true));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
                 }
-/**/
-
 
                 circle = mMap.addCircle(new CircleOptions()
                         .center(myLoc)
@@ -110,9 +123,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .strokeColor(Color.GREEN)
                         .fillColor(Color.argb(128,255,0,0))
                         .clickable(true));
+
                 TxtLat.setText(Double.toString(tm));
                 TxtLon.setText(Double.toString(tm1));
-
                 TxtTim.setText(Boolean.toString(true));
 
             }
@@ -127,7 +140,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         TxtLat = (TextView) findViewById(R.id.TxtLat);
         TxtLon = (TextView) findViewById(R.id.TxtLon);
-
         TxtTim = (TextView) findViewById(R.id.TxtTim);
 
     }//dist ini
@@ -138,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             PermitirLocalizacao.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
                     Manifest.permission.ACCESS_FINE_LOCATION, true);
         } else if (mMap != null) {
-            mMap.setMyLocationEnabled(true);
+            mMap.setMyLocationEnabled(false);
         }
     }
 
@@ -151,9 +163,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (PermitirLocalizacao.isPermissionGranted(permissions, grantResults,
                 Manifest.permission.ACCESS_FINE_LOCATION)) {
-            enableMyLocation();
+          enableMyLocation();
         }
     }
+
 
     @Override
     protected void onResumeFragments() {
@@ -174,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
+        enableMyLocation();
     }
 
     @Override
@@ -198,8 +212,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             return;
-        }
-        enableMyLocation();
+        }enableMyLocation();
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
     }
@@ -252,11 +265,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-
         mMap = googleMap;
+
+        final DatabaseReference myRef = database.getReference("Local");
+        mMap.clear();
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
+                for (DataSnapshot dataSnapshot1 : dataSnapshots) {
+                    Local value = dataSnapshot1.getValue(Local.class);
+
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(value.getLat(), value.getLon()))
+                            .flat(true)
+                            .title(value.getNome())
+                            .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                            .snippet(dataSnapshot1.getKey())
+
+                    );
+                }
+
+
+
+            }
+            @Override
+            public void onCancelled(DatabaseError error) {
+            }
+        });
+
+
 
         // Add a marker in Sydney and move the camera
         myLoc = new LatLng(tm, tm1);
@@ -271,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .fillColor(Color.GREEN)
                     .strokeColor(Color.BLUE)
             );
+        enableMyLocation();
     }
 
     public void loco(View view) {
@@ -278,6 +321,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         myLoc = new LatLng(tm, tm1);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
         mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
+
+
+
+
+
 
 
     }
@@ -290,8 +338,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 }
 
 
-
-
+//ZONA FANTASMA
 
 
     /*public boolean distancia(LatLng latlon1,LatLng latlon2) {  // generally used geo measurement function
