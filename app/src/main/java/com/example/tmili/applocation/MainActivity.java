@@ -48,13 +48,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         LocationListener, GoogleMap.OnMyLocationButtonClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
 
+    FirebaseDatabase database;
     GoogleMap mMap;
-    private final String LOG_TAG = "TestApp";
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Circle circle;
-    FirebaseDatabase database;
 
     private TextView TxtLat;
     private TextView TxtLon;
@@ -65,13 +64,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public double tm;
     public double tm1;
-    private int radiu=1000;
+    private int radiu=5000;
+    private String ref="";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
+    private final String LOG_TAG = "TestApp";
 
     //41102
-
-    @Override//inicio
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -84,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
          database = FirebaseDatabase.getInstance();
 
+        Intent filtros =getIntent();
+        ref = filtros.getStringExtra("filtro");
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +98,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 myLoc = new LatLng(tm, tm1);
                 mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
-                final DatabaseReference myRef = database.getReference("Local");
+
+                final DatabaseReference myRef = database.getReference(ref);
                 myRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -280,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap = googleMap;
 
-        final DatabaseReference myRef = database.getReference("Local");
+        final DatabaseReference myRef = database.getReference(ref);
         mMap.clear();
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
