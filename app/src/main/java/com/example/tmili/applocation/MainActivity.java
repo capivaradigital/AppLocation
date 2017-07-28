@@ -50,10 +50,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     FirebaseDatabase database;
     GoogleMap mMap;
-
+    private int icon;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Circle circle;
+    private int gamb;
 
     private TextView TxtLat;
     private TextView TxtLon;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public double tm;
     public double tm1;
-    private int radiu=5000;
+    private int radiu=10000;
     private String ref="";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
@@ -87,6 +88,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent filtros =getIntent();
         ref = filtros.getStringExtra("filtro");
 
+        if(ref.equals("Filtro/Pet_Shop")){
+            gamb=R.mipmap.ic_petshop;
+        }
+        if(ref.equals("Filtro/Veterinario")){
+            gamb=R.mipmap.ic_veterinario;
+        }
+        if(ref.equals("Filtro/Pet_Friendly")){
+            gamb=R.mipmap.ic_petfriendly;
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         Iterable<DataSnapshot> dataSnapshots = dataSnapshot.getChildren();
-
                         for (DataSnapshot dataSnapshot1 : dataSnapshots) {
                             Local value = dataSnapshot1.getValue(Local.class);
                             novoP = new LatLng(value.getLat(), value.getLon());
@@ -114,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         .position(novoP)
                                         .flat(true)
                                         .title(value.getNome())
-                                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                                        .icon(BitmapDescriptorFactory.fromResource(gamb))
                                         .snippet(dataSnapshot1.getKey())
 
                                 );
@@ -134,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .radius(radiu)
                         .strokeWidth(10)
                         .strokeColor(Color.GREEN)
-                        .fillColor(Color.argb(128,255,0,0))
+                        .fillColor(Color.argb(0,0,0,255))
                         .clickable(true));
 
                 TxtLat.setText(Double.toString(tm));
@@ -300,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .position(novoP)
                                 .flat(true)
                                 .title(value.getNome())
-                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                                .icon(BitmapDescriptorFactory.fromResource(gamb))
                                 .snippet(dataSnapshot1.getKey())
 
                         );
