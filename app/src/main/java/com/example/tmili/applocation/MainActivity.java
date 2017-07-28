@@ -316,8 +316,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
-
         // Add a marker in Sydney and move the camera
         myLoc = new LatLng(tm, tm1);
 
@@ -339,11 +337,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         myLoc = new LatLng(tm, tm1);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLoc, 16));
         mMap.addMarker(new MarkerOptions().position(myLoc).title("Marker in Sydney"));
-
-
-
-
-
 
 
     }

@@ -1,15 +1,11 @@
 package com.example.tmili.applocation;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 public class Filtro extends AppCompatActivity {
-
-
-    private Activity activity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

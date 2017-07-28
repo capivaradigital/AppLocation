@@ -18,7 +18,6 @@ public class Distancia {
     }
 
     void setDistancia( LatLng nDest){
-        //origim=nOrigim;
         dest=nDest;
     }
 
