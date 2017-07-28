@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .center(myLoc)
                 .radius(radiu)
                 .strokeWidth(10)
-                    .fillColor(Color.GREEN)
+                    //.fillColor(Color.GREEN)
                     .strokeColor(Color.BLUE)
             );
         enableMyLocation();
