@@ -166,30 +166,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }//dist ini
 
-    private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            PermitirLocalizacao.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
-                    Manifest.permission.ACCESS_FINE_LOCATION, true);
-        } else if (mMap != null) {
-            mMap.setMyLocationEnabled(false);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return;
-        }
-
-        if (PermitirLocalizacao.isPermissionGranted(permissions, grantResults,
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-          enableMyLocation();
-        }
-    }
-
-
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
@@ -209,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         super.onStart();
         mGoogleApiClient.connect();
-        enableMyLocation();
+
     }
 
     @Override
@@ -234,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             return;
-        }enableMyLocation();
+        }
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
 
     }
@@ -337,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     //.fillColor(Color.GREEN)
                     .strokeColor(Color.BLUE)
             );
-        enableMyLocation();
+
     }
 
     public void loco(View view) {
@@ -374,4 +350,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }else{
             return false;
         }
-    }*///dist fim
+    }
+
+    /*
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            PermitirLocalizacao.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+        } else if (mMap != null) {
+            mMap.setMyLocationEnabled(false);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            return;
+        }
+
+        if (PermitirLocalizacao.isPermissionGranted(permissions, grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION)) {
+          enableMyLocation();
+        }
+    }
+
+
+    */
+    //dist fim
