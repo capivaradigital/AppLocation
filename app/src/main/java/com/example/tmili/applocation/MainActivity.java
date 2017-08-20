@@ -39,6 +39,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -256,16 +257,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.i("Script", "OnQueryTextChange ->"+ query);
                 return false;
             }
-
+            FirebaseDatabase mDatabase = FirebaseDatabase.getInstance();
+            DatabaseReference myRef = mDatabase.getReference("Local");
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.i("Script", "OnQueryTextChange ->"+ newText);
+                Query q =myRef.orderByChild("Nome").startAt(newText);
+
+
+                q.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+
+                Log.i("meu pau", "OnQueryTextChange ->"+ q);
                 return false;
+
             }
         });
 
         return true;
     }
+
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
