@@ -28,9 +28,15 @@ public class Filtro extends AppCompatActivity implements GoogleMap.OnMyLocationB
     String petS ="Filtro/Pet_Shop";
     String vet ="Filtro/Veterinario";
     String petF ="Filtro/Pet_Friendly";
-
+    String petO = "Local";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
+
+    public void PetO(View view) {
+    Intent tm = new Intent(Filtro.this, ListaOnline.class);
+    tm.putExtra("filtro",petO);
+        startActivity(tm);
+    }
 
     public void Vet(View view) {
         Intent tm = new Intent(Filtro.this, MainActivity.class);
@@ -79,4 +85,6 @@ public class Filtro extends AppCompatActivity implements GoogleMap.OnMyLocationB
     public boolean onMyLocationButtonClick() {
         return false;
     }
+
+
 }
