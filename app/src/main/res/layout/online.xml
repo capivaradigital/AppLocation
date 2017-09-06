@@ -10,9 +10,9 @@
     </data>
 
     <android.support.v7.widget.CardView
-        android:layout_width="368dp"
-        android:layout_height="495dp"
-        android:layout_margin="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_margin="7dp"
         android:foreground="?android:attr/selectableItemBackground"
         app:cardCornerRadius="5dp">
         <LinearLayout
@@ -28,7 +28,6 @@
                 android:layout_gravity="center"
                 android:text="@{local.nome}"
                 android:textAppearance="?android:attr/textAppearanceLarge"/>
-
-        </LinearLayout>
+             </LinearLayout>
     </android.support.v7.widget.CardView>
 </layout>
